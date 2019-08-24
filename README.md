@@ -1,0 +1,165 @@
+# SholatYuk (Muslim Adhan Time JavaScript)
+
+[![Build Status](https://badgen.net/travis/tanahatas/sholatyuk)](https://travis-ci.org/tanahatas/sholatyuk)
+[![Test Covarage](https://badgen.net/codecov/c/github/tanahatas/sholatyuk)](https://codecov.io/gh/tanahatas/sholatyuk)
+[![Greenkeeper](https://badges.greenkeeper.io/tanahatas/sholatyuk.svg)](https://greenkeeper.io)
+[![Latest Version](https://badgen.net/npm/v/sholatyuk)](https://www.npmjs.com/package/sholatyuk)
+
+SholatYuk JavaScript is a well tested and well documented library for calculating Islamic prayer times in JavaScript using Node or a web browser.
+
+All astronomical calculations are high precision equations directly from the book [“Astronomical Algorithms” by Jean Meeus](http://www.willbell.com/math/mc1.htm). This book is recommended by the Astronomical Applications Department of the U.S. Naval Observatory and the Earth System Research Laboratory of the National Oceanic and Atmospheric Administration.
+
+## Installation
+
+### Browser
+
+Simply include SholatYuk.js in your HTML page
+
+```
+<script src="SholatYuk.js"></script>
+```
+
+### Node
+
+SholatYuk is available in npm
+
+```
+npm install sholatyuk
+```
+
+and then require the module
+
+```
+var sholatyuk = require('sholatyuk')
+```
+
+## Usage
+
+To get prayer times initialize a new `PrayerTimes` object passing in coordinates,
+date, and calculation parameters.
+
+```js
+var prayerTimes = new sholatyuk.PrayerTimes(coordinates, date, params);
+```
+
+### Initialization parameters
+
+#### Coordinates
+
+Create a `Coordinates` object with the latitude and longitude for the location
+you want prayer times for.
+
+```js
+var coordinates = new sholatyuk.Coordinates(35.78056, -78.6389);
+```
+
+#### Date
+
+The date parameter passed in should be an instance of the JavaScript `Date`
+object. The year, month, and day values need to be populated. All other
+values will be ignored. The year, month and day values should be for the local date
+that you want prayer times for. These date values are expected to be for the Gregorian calendar.
+
+```js
+var date = new Date();
+var date = new Date(2015, 11, 1);
+```
+
+#### Calculation parameters
+
+The rest of the needed information is contained within the `CalculationParameters` object.
+Instead of manually initializing this object it is recommended to use one of the pre-populated
+instances in the `CalculationMethod` object. You can then further
+customize the calculation parameters if needed.
+
+```js
+var params = sholatyuk.CalculationMethod.MuslimWorldLeague();
+params.madhab = sholatyuk.Madhab.Hanafi;
+params.adjustments.fajr = 2;
+```
+
+| Parameter | Description |
+| --------- | ----------- |
+| method    | CalculationMethod name |
+| fajrAngle | Angle of the sun used to calculate Fajr |
+| ishaAngle | Angle of the sun used to calculate Isha |
+| ishaInterval | Minutes after Maghrib (if set, the time for Isha will be Maghrib plus ishaInterval) |
+| madhab | Value from the Madhab object, used to calculate Asr |
+| highLatitudeRule | Value from the HighLatitudeRule object, used to set a minimum time for Fajr and a max time for Isha |
+| adjustments | JavaScript object with custom prayer time adjustments in minutes for each prayer time |
+
+**CalculationMethod**
+
+| Value | Description |
+| ----- | ----------- |
+| MuslimWorldLeague | Muslim World League. Fajr angle: 18, Isha angle: 17 |
+| Egyptian | Egyptian General Authority of Survey. Fajr angle: 19.5, Isha angle: 17.5 |
+| Karachi | University of Islamic Sciences, Karachi. Fajr angle: 18, Isha angle: 18 |
+| UmmAlQura | Umm al-Qura University, Makkah. Fajr angle: 18, Isha interval: 90. *Note: you should add a +30 minute custom adjustment for Isha during Ramadan.* |
+| Dubai | Method used in UAE. Fajr angle: 18.2, Isha angle: 18.2. |
+| Qatar | Modified version of Umm al-Qura used in Qatar. Fajr angle: 18, Isha interval: 90. |
+| Kuwait | Method used by the country of Kuwait. Fajr angle: 18, Isha angle: 17.5 |
+| MoonsightingCommittee | Moonsighting Committee. Fajr angle: 18, Isha angle: 18. Also uses seasonal adjustment values. |
+| Singapore | Method used by Singapore. Fajr angle: 20, Isha angle: 18. |
+| NorthAmerica | Referred to as the ISNA method. This method is included for completeness but is not recommended. Fajr angle: 15, Isha angle: 15 |
+| Other | Fajr angle: 0, Isha angle: 0. This is the default value for `method` when initializing a `CalculationParameters` object. |
+
+**Madhab**
+
+| Value | Description |
+| ----- | ----------- |
+| Shafi | Earlier Asr time |
+| Hanafi | Later Asr time |
+
+**HighLatitudeRule**
+
+| Value | Description |
+| ----- | ----------- |
+| MiddleOfTheNight | Fajr will never be earlier than the middle of the night and Isha will never be later than the middle of the night |
+| SeventhOfTheNight | Fajr will never be earlier than the beginning of the last seventh of the night and Isha will never be later than the end of the first seventh of the night |
+| TwilightAngle | Similar to SeventhOfTheNight, but instead of 1/7, the fraction of the night used is fajrAngle/60 and ishaAngle/60 |
+
+
+### Prayer Times
+
+Once the `PrayerTimes` object has been initialized it will contain values
+for all five prayer times and the time for sunrise. The prayer times will be
+Date object instances initialized with UTC values. To display these
+times for the local timezone, a formatting and timezone conversion extension
+to the Date object has been provided. Call `formattedTime(date)` and pass in 
+the date instance and the  UTC offset in hours for the appropriate timezone.
+There is also a second optional parameter of style, if you pass in '24h' the
+times will be formatted in 24 hour mode.
+
+```js
+sholatyuk.Date.formattedTime(prayerTimes.fajr, -4);
+sholatyuk.Date.formattedTime(prayerTimes.fajr, -4, '24h');
+```
+
+## Full Example
+
+```js
+var date = new Date();
+var coordinates = new sholatyuk.Coordinates(35.78056, -78.6389);
+var params = sholatyuk.CalculationMethod.MuslimWorldLeague();
+params.madhab = sholatyuk.Madhab.Hanafi;
+var prayerTimes = new sholatyuk.PrayerTimes(coordinates, date, params);
+var formattedTime = sholatyuk.Date.formattedTime;
+document.write('Fajr: ' + formattedTime(prayerTimes.fajr, -4) + '\n');
+document.write('Sunrise: ' + formattedTime(prayerTimes.sunrise, -4) + '\n');
+document.write('Dhuhr: ' + formattedTime(prayerTimes.dhuhr, -4) + '\n');
+document.write('Asr: ' + formattedTime(prayerTimes.asr, -4) + '\n');
+document.write('Maghrib: ' + formattedTime(prayerTimes.maghrib, -4) + '\n');
+document.write('Isha: ' + formattedTime(prayerTimes.isha, -4) + '\n');
+```
+
+## Contributing
+
+SholatYuk is made publicly available to provide a well tested and well documented library for Islamic prayer times to all 
+developers. We accept feature contributions provided that they are properly documented and include the appropriate 
+unit tests. We are also looking for contributions in the form of unit tests of of prayer times for different 
+locations, we do ask that the source of the comparison values be properly documented.
+
+## License
+
+SholatYuk is available under the MIT license. See the LICENSE file for more info.
