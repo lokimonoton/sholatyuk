@@ -1,8 +1,5 @@
 # SholatYuk (Muslim Adhan Time JavaScript)
 
-[![Build Status](https://badgen.net/travis/tanahatas/sholatyuk)](https://travis-ci.org/tanahatas/sholatyuk)
-[![Test Covarage](https://badgen.net/codecov/c/github/tanahatas/sholatyuk)](https://codecov.io/gh/tanahatas/sholatyuk)
-[![Greenkeeper](https://badges.greenkeeper.io/tanahatas/sholatyuk.svg)](https://greenkeeper.io)
 [![Latest Version](https://badgen.net/npm/v/sholatyuk)](https://www.npmjs.com/package/sholatyuk)
 
 SholatYuk JavaScript is a well tested and well documented library for calculating Islamic prayer times in JavaScript using Node or a web browser.
